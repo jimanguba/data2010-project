@@ -17,22 +17,35 @@ nv_tourist <- read.csv("non-verbal tourist data.csv")
 
 # TAudio1 and Proxemics might be switched
 ```{r}
+
 library(tidyverse)
-nv_tourist |>
+new_nv_tourist <- nv_tourist |>
   rename(
-    handshake = GImg1,
-    hug = GImg2,
-    kiss = GImg3,
-    consent = PImg1,
-    interest = PImg2,
-    neutral = PImg3,
-    reflexive = PImg4,
-    negative = PImg5,
+    handshake_indiff = GImg1,
+    hug_indiff = GImg2,
+    kiss_indiff = GImg3,
+    consent_post = PImg1,
+    interest_post = PImg2,
+    neutral_post = PImg3,
+    reflexive_post = PImg4,
+    negative_post = PImg5,
+    relax_score = Tense...relaxed,
+    anarchic_score = Authoritative..anarchic,
+    friendly_score = Hostile...friendly,
     authoritative = TAudio1,
     sarcastic = TAudio2,
     friendly = TAudio3,
     spitting = QAudio1,
     hum = QAudio2,
-    sigh = QAudio3
-  )
+    sigh = QAudio3,
+    client_type = Type.of.Client
+  ) 
+new_nv_tourist
+
+# checking for missing values...
+for(curr_col in seq(1, ncol(new_nv_tourist))) {
+  print(sum(new_nv_tourist[curr_col] == "?"))
+}
+
+# should figure out what method to use to deal with missing values!
 ```
