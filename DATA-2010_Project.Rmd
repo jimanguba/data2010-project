@@ -1,0 +1,16 @@
+---
+title: "DATA-2010_Project"
+author: "Jillian Manguba, Thien Pham, Kelly Villamayor, Abhinav Jain"
+date: "2024-02-12"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## DATA 2010 Project
+
+```{r}
+nv_tourist <- read.csv("non-verbal tourist data.csv")
+```
