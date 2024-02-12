@@ -14,3 +14,25 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 nv_tourist <- read.csv("non-verbal tourist data.csv")
 ```
+
+# TAudio1 and Proxemics might be switched
+```{r}
+library(tidyverse)
+nv_tourist |>
+  rename(
+    handshake = GImg1,
+    hug = GImg2,
+    kiss = GImg3,
+    consent = PImg1,
+    interest = PImg2,
+    neutral = PImg3,
+    reflexive = PImg4,
+    negative = PImg5,
+    authoritative = TAudio1,
+    sarcastic = TAudio2,
+    friendly = TAudio3,
+    spitting = QAudio1,
+    hum = QAudio2,
+    sigh = QAudio3
+  )
+```
