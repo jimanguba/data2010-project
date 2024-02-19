@@ -15,7 +15,9 @@ knitr::opts_chunk$set(echo = TRUE)
 nv_tourist <- read.csv("non-verbal tourist data.csv")
 ```
 
-# TAudio1 and Proxemics might be switched
+Note: Original dataset switched TAudio1 and Proxemics
+new_nv_tourist rectified this error
+
 ```{r}
 
 library(tidyverse)
@@ -32,20 +34,32 @@ new_nv_tourist <- nv_tourist |>
     relax_score = Tense...relaxed,
     anarchic_score = Authoritative..anarchic,
     friendly_score = Hostile...friendly,
-    authoritative = TAudio1,
+    authoritative = Proxemics,
     sarcastic = TAudio2,
     friendly = TAudio3,
     spitting = QAudio1,
     hum = QAudio2,
     sigh = QAudio3,
+    proxemics = TAudio1,
     client_type = Type.of.Client
   ) 
-new_nv_tourist
+```
 
+```{r}
 # checking for missing values...
-for(curr_col in seq(1, ncol(new_nv_tourist))) {
-  print(sum(new_nv_tourist[curr_col] == "?"))
+
+# the dataset uses "?" to indicate a missing value
+contains_missing <- function(row) {
+  any(row == "?")
 }
 
-# should figure out what method to use to deal with missing values!
+rows_w_missing_val <- apply(new_nv_tourist, 1, contains_missing)
+print(new_nv_tourist[rows_w_missing_val,])
+
+```
+
+Based off the results, it seems the missing values fall under MAR (missing at random). We decided to simply delete the rows that contained any missing values, since it is just 4 rows out of the total 73. Thus, it meets the 5-10% range for deletion in MAR.
+
+```{r}
+new_nv_tourist <- new_nv_tourist[!rows_w_missing_val,]
 ```
