@@ -12,11 +12,17 @@ knitr::opts_chunk$set(echo = TRUE)
 ## DATA 2010 Project
 
 ```{r}
+
+library(ggplot2)
+library(gridExtra)
+
+```
+
+```{r}
 nv_tourist <- read.csv("non-verbal tourist data.csv")
 ```
 
-Note: Original dataset switched TAudio1 and Proxemics
-new_nv_tourist rectified this error
+Note: Original dataset switched TAudio1 and Proxemics new_nv_tourist rectified this error
 
 ```{r}
 
@@ -40,17 +46,19 @@ new_nv_tourist <- nv_tourist |>
     spitting = QAudio1,
     hum = QAudio2,
     sigh = QAudio3,
-    proxemics = TAudio1,
+    proxemic = TAudio1,
     client_type = Type.of.Client
   ) 
+
 ```
 
 ```{r}
+
 # checking for missing values...
 
 # the dataset uses "?" to indicate a missing value
 contains_missing <- function(row) {
-  any(row == "?")
+  any(row == "?") || any(is.na(row))
 }
 
 rows_w_missing_val <- apply(new_nv_tourist, 1, contains_missing)
@@ -61,5 +69,146 @@ print(new_nv_tourist[rows_w_missing_val,])
 Based off the results, it seems the missing values fall under MAR (missing at random). We decided to simply delete the rows that contained any missing values, since it is just 4 rows out of the total 73. Thus, it meets the 5-10% range for deletion in MAR.
 
 ```{r}
+
 new_nv_tourist <- new_nv_tourist[!rows_w_missing_val,]
+
+```
+
+```{r}
+
+new_nv_tourist$anarchic_score <- as.numeric(new_nv_tourist$anarchic_score)
+
+```
+
+### Data Exploration
+
+Gesture
+
+```{r}
+
+# this barplot is acting weird with the stacks...
+
+# GRAPH 1
+new_nv_tourist |>
+  ggplot() +
+  geom_bar(aes(x = handshake_indiff, fill = sex), position = "stack") +
+  geom_bar(aes(x = hug_indiff, fill = sex), position = "stack") +
+  geom_bar(aes(x = kiss_indiff, fill = sex), position = "stack") +
+  labs(x = "Perception", y = "Count", title = "Gesture Perception by Sex") +
+  facet_wrap(~ c("Handshake", "Hug", "Kiss"), nrow = 1) +
+  theme_minimal()
+
+
+# GRAPH 2
+new_nv_tourist |>
+  ggplot() +
+  geom_bar(aes(x = handshake_indiff, fill = country), position = "stack") +
+  geom_bar(aes(x = hug_indiff, fill = country), position = "stack") +
+  geom_bar(aes(x = kiss_indiff, fill = country), position = "stack") +
+  labs(x = "Perception", y = "Count", title = "Gesture Perception by Country") +
+  facet_wrap(~ c("Handshake", "Hug", "Kiss"), nrow = 1) +
+  theme_minimal()
+
+```
+
+Posture
+
+```{r}
+
+new_nv_tourist |>
+  ggplot() +
+  geom_bar(aes(x = consent_post, fill = sex), position = "stack") +
+  geom_bar(aes(x = interest_post, fill = sex), position = "stack") +
+  geom_bar(aes(x = neutral_post, fill = sex), position = "stack") +
+  labs(x = "Perception", y = "Count", title = "Posture Perception by Sex") +
+  facet_wrap(~c("Consent", "Interest", "Neutral"), nrow = 1) +
+  theme_minimal()
+
+plot1 <- ggplot(new_nv_tourist, aes(x = reflexive_post, fill = sex)) +
+  geom_bar(position = "stack") +
+  labs(x = "", y = "Count", title = "Reflexive") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        plot.title = element_text(size = 9)) 
+
+plot2 <- ggplot(new_nv_tourist, aes(x = negative_post, fill = sex)) +
+  geom_bar(position = "stack") +
+  labs(x = "", y = "Count", title = "Negative") +
+  theme_minimal() + 
+  theme(plot.title = element_text(size = 9))
+
+grid.arrange(plot1, plot2, nrow = 1, 
+             top = "Posture Perception by Sex 2", 
+             bottom = "Perception")
+
+```
+
+Emotional Atmosphere
+
+```{r}
+
+find_mode <- function(vector) {
+  names(sort(table(as.character(vector)), decreasing =TRUE)[1])
+}
+
+new_nv_tourist |>
+  group_by(sex) |>
+  summarise(avg_relax = mean(relax_score),
+            avg_anarchic = mean(anarchic_score),
+            avg_friendly = mean(friendly_score),
+            mode_relax = find_mode(relax_score),
+            mode_anarchic = find_mode(anarchic_score),
+            mode_friendly = find_mode(friendly_score))
+```
+
+Tone
+
+```{r}
+
+plot1 <- ggplot(new_nv_tourist, aes(x = authoritative, fill = sex)) +
+  geom_bar(position = "stack") +
+  labs(x = "", y = "Count", title = "Authoritative") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        plot.title = element_text(size = 9)) 
+
+plot2 <- ggplot(new_nv_tourist, aes(x = sarcastic, fill = sex)) +
+  geom_bar(position = "stack") +
+  labs(x = "", y = "Count", title = "Sarcastic") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 9))
+
+grid.arrange(plot1, plot2, nrow = 1, 
+             top = "Tone Perception by Sex", 
+             bottom = "Perception")
+
+```
+
+Quasi Lexicon
+
+```{r}
+
+# there's something weird happening in this bar plot
+
+new_nv_tourist |>
+  ggplot() +
+  geom_bar(aes(x = spitting, fill = sex), position = "stack") +
+  geom_bar(aes(x = hum, fill = sex), position = "stack") +
+  geom_bar(aes(x = sigh, fill = sex), position = "stack") +
+  labs(x = "Perception", y = "Count", title = "Quasi-Lexicon Perception by Sex") +
+  facet_wrap(~ c("Spitting", "Hum", "Sigh"), nrow = 1) +
+  theme_minimal()
+
+```
+
+Proxemic
+
+```{r}
+
+new_nv_tourist |>
+  ggplot() +
+  geom_bar(aes(x = proxemic, fill = sex), position = "stack") +
+  labs(x = "Proxemic", y = "Count", title = "Proxemic Perception by Sex") +
+  theme_minimal()
+
 ```
